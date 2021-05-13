@@ -41,19 +41,8 @@ def masked_fill_compute(x, mask, value, y, kernel_name="masked_fill"):
     :return:y
             TVM tensor
     """
-
-    x_shape = shape_util.shape_to_list(x.shape)
-    mask_shape = shape_util.shape_to_list(mask.shape)
-    value_shape = shape_util.shape_to_list(value.shape)
-    # computer output shape
-    x_shape, mask_shape, value_shape, target_shape = shape_util.unify_broadcast_shapes(
-        [x_shape, mask_shape, value_shape])
-    mask = tbe.broadcast(mask, target_shape)
-    x = tbe.broadcast(x, target_shape)
-    value = tbe.broadcast(value, target_shape)
-
     ori_dtype = x.dtype
-    if x.dtype in ('int8'):
+    if x.dtype in ('int8',):
         x = tbe.cast_to(x, 'float16')
     target_dtype = x.dtype
 
@@ -63,6 +52,16 @@ def masked_fill_compute(x, mask, value, y, kernel_name="masked_fill"):
 
     if value.dtype != x.dtype:
         value = tbe.cast_to(value, x.dtype)
+    
+    x_shape = shape_util.shape_to_list(x.shape)
+    mask_shape = shape_util.shape_to_list(mask.shape)
+    value_shape = shape_util.shape_to_list(value.shape)
+    # computer output shape
+    x_shape, mask_shape, value_shape, target_shape = shape_util.unify_broadcast_shapes(
+        [x_shape, mask_shape, value_shape])
+    mask = tbe.broadcast(mask, target_shape)
+    x = tbe.broadcast(x, target_shape)
+    value = tbe.broadcast(value, target_shape)
 
     tensor_ones = tbe.broadcast(tvm.const(1, target_dtype), target_shape)
 
